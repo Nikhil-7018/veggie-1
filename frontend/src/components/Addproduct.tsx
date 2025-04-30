@@ -3,16 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { addProduct, Product as FirebaseProduct } from "../services/products";
+import { getAuth } from "firebase/auth";
 
 const AddProduct = () => {
-  const [product, setProduct] = useState<Omit<FirebaseProduct, 'id'>>({
+  const navigate = useNavigate();
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  const [product, setProduct] = useState<Omit<FirebaseProduct, 'id'>>(() => ({
     name: "",
     price: 0,
     image: "",
     description: "",
     category: "",
-  });
-  const navigate = useNavigate();
+    userId: currentUser?.uid || "",
+  }));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,28 +43,37 @@ const AddProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
+    if (!currentUser) {
+      toast.error("You must be logged in to add a product", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+      return;
+    }
+
     if (!product.name || !product.price || !product.image || !product.description || !product.category) {
       toast.error("Please fill out all fields and upload an image", {
         position: "top-center",
-        autoClose: 1000,
+        autoClose: 2000,
       });
       return;
     }
 
     try {
-      console.log("Attempting to add product:", product);
-      // Add product to Firebase
-      const productId = await addProduct(product);
+      const productWithUserId = {
+        ...product,
+        userId: currentUser.uid,
+      };
+
+      console.log("Attempting to add product:", productWithUserId);
+      const productId = await addProduct(productWithUserId);
       console.log("Product added successfully with ID:", productId);
 
-      // Show success message
-      toast.success(`Item added successfully! ${product.name}`, {
+      toast.success(`Product "${product.name}" added successfully!`, {
         position: "top-center",
-        autoClose: 1000,
+        autoClose: 2000,
       });
 
-      // Navigate to shop page
       setTimeout(() => {
         navigate("/shop");
       }, 1500);
@@ -67,91 +81,120 @@ const AddProduct = () => {
       console.error("Error adding product:", error);
       toast.error("Error adding product. Please try again.", {
         position: "top-center",
-        autoClose: 1000,
+        autoClose: 2000,
       });
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <ToastContainer />
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Add Product</h1>
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <div className="flex flex-col">
-            <label className="text-gray-700 font-medium">Product Name</label>
-            <input
-              type="text"
-              name="name"
-              value={product.name}
-              onChange={handleChange}
-              placeholder="Enter product name"
-              className="mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 font-medium">Price</label>
-            <input
-              type="number"
-              name="price"
-              value={product.price}
-              onChange={handleChange}
-              placeholder="Enter price"
-              className="mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 font-medium">Description</label>
-            <textarea
-              name="description"
-              value={product.description}
-              onChange={handleChange}
-              placeholder="Enter product description"
-              className="mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 font-medium">Category</label>
-            <select
-              name="category"
-              value={product.category}
-              onChange={handleChange}
-              className="mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select a category</option>
-              <option value="vegetables">Vegetables</option>
-              <option value="fruits">Fruits</option>
-              <option value="dairy">Dairy</option>
-              <option value="grains">Grains</option>
-            </select>
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 font-medium">Product Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          {product.image && (
-            <div className="mt-4">
-              <img src={product.image} alt="Preview" className="max-w-full h-auto rounded-md" />
-            </div>
-          )}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center mb-8">
           <button
-            type="submit"
-            className="bg-blue-500 text-white font-semibold py-3 px-4 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+            onClick={() => navigate('/')}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300"
           >
-            Add Product
+            ← Back to Home
           </button>
-        </form>
+          <h1 className="text-3xl font-bold text-gray-800">Add New Product</h1>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={product.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter product name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={product.price}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter price"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <select
+                  name="category"
+                  value={product.category}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  <option value="vegetables">Vegetables</option>
+                  <option value="fruits">Fruits</option>
+                  <option value="dairy">Dairy</option>
+                  <option value="grains">Grains</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Product Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                name="description"
+                value={product.description}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter product description"
+                rows={4}
+                required
+              />
+            </div>
+
+            {product.image && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
+                <img
+                  src={product.image}
+                  alt="Preview"
+                  className="max-w-xs h-auto rounded-lg shadow-md"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg shadow-md transition duration-300 text-lg font-semibold"
+              >
+                Add Product
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

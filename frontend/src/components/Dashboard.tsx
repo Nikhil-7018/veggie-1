@@ -4,16 +4,17 @@ import SecondBody from "./About";
 import Products from "./products";
 import Footer from "./footer";
 import '../index.css';
+
 const Dashboard = () => {
     return (
       <>
-   <Navbar />
-   <FirstBody />
-   <SecondBody />
-   <Products />
-   <Footer />
+        <Navbar />
+        <FirstBody />
+        <SecondBody />
+        <Products />
+        <Footer />
       </>
     )
   };
   
-  export default Dashboard;
+export default Dashboard;

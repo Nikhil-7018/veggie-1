@@ -1,7 +1,9 @@
 import '../index.css';
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const Body = () => {
+  const navigate = useNavigate();
   const slides = [
     {
       image: "/images/img1.jpg", // Ensure this path is correct!
@@ -45,9 +47,20 @@ const Body = () => {
         <p className="text-white text-lg md:text-2xl italic mb-6">
           {subheading}
         </p>
-        <button className="bg-green-400 hover:bg-lime-500 text-white rounded-full px-6 py-2 font-bold">
-          {buttonText}
-        </button>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => navigate('/addproduct')}
+            className="bg-green-400 hover:bg-lime-500 text-white rounded-full px-6 py-2 font-bold"
+          >
+            Farmer Portal
+          </button>
+          <button 
+            onClick={() => navigate('/shop')}
+            className="bg-green-400 hover:bg-lime-500 text-white rounded-full px-6 py-2 font-bold"
+          >
+            Shop Now
+          </button>
+        </div>
       </div>
     </div>
   );

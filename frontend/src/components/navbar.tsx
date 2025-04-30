@@ -56,7 +56,7 @@ const Navbar = () => {
             </div>
             <div className="flex items-center gap-2">
               <Truck size={20} />
-              <span>3-5 Business Days Delivery & Free Returns</span>
+              <span>Delivery in 24 hours & Free Returns</span>
             </div>
           </div>
 
@@ -67,7 +67,6 @@ const Navbar = () => {
             </div>
             <div className="flex space-x-10 text-gray-800 font-medium">
               <a href="#" onClick={() => scrollToSection("hero")} className="hover:text-green-500">Home</a>
-              <a href="#" onClick={() => scrollToSection("about")} className="hover:text-green-500">About</a>
               <Link to='/shop' className="hover:text-green-500">Shop</Link>
               <Link to="/addProduct" className="hover:text-green-500">AddProducts</Link>
               <Link to="/contact" className="hover:text-green-500">Contact</Link>

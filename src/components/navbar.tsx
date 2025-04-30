@@ -1,0 +1,3 @@
+const handleLogout = async (): Promise<void> => {
+  // ... existing code ...
+} 

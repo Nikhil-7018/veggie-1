@@ -2,12 +2,14 @@ import "../index.css";
 import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from 'react-router-dom';
 
 interface CartItem {
   id: number;
   name: string;
   price: number;
   quantity: number;
+  image?: string;
 }
 
 const CartPage: React.FC = () => {
@@ -16,12 +18,15 @@ const CartPage: React.FC = () => {
     return storedCart ? JSON.parse(storedCart) : [];
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   const removeFromCart = (id: number) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+    toast.success("Item removed from cart");
   };
 
   const updateQuantity = (id: number, quantity: number) => {
@@ -33,49 +38,100 @@ const CartPage: React.FC = () => {
   const totalBill = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    toast(`Total Bill: $${totalBill.toFixed(2)}\nThank you for your purchase!`, { position: "top-center" });
+    toast.success(`Order placed successfully! Total: ₹${totalBill.toFixed(2)}`, { 
+      position: "top-center",
+      autoClose: 3000 
+    });
     setCart([]);
     localStorage.removeItem("cart");
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <ToastContainer />
-      <h1 className="text-2xl font-bold text-center mb-4">Shopping Cart</h1>
-
-      {cart.length === 0 ? (
-        <p className="text-gray-500 text-center">Your cart is empty.</p>
-      ) : (
-        <>
-          <ul>
-            {cart.map((item) => (
-              <li key={item.id} className="flex justify-between items-center border-b py-3">
-                <span>{item.name} (x{item.quantity})</span>
-                <input
-                  type="number"
-                  value={item.quantity}
-                  min="1"
-                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                  className="w-12 p-1 border rounded text-center"
-                />
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
-                <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700">
-                  ❌
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="flex justify-between mt-4 font-bold">
-            <span>Total:</span>
-            <span>${totalBill.toFixed(2)}</span>
-          </div>
-
-          <button onClick={handleCheckout} className="w-full mt-4 bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
-            Checkout
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300"
+          >
+            ← Back to Home
           </button>
-        </>
-      )}
+          <h1 className="text-3xl font-bold text-gray-800">Your Shopping Cart</h1>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          {cart.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-xl mb-4">Your cart is empty</p>
+              <button
+                onClick={() => navigate('/shop')}
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-md"
+                      />
+                    )}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
+                      <p className="text-green-600 font-bold">₹{item.price.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                      >
+                        -
+                      </button>
+                      <span className="w-8 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <div className="border-t pt-6 mt-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-gray-800">Total Amount:</span>
+                  <span className="text-2xl font-bold text-green-600">₹{totalBill.toFixed(2)}</span>
+                </div>
+                <button
+                  onClick={handleCheckout}
+                  className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg shadow-md transition duration-300 text-lg font-semibold"
+                >
+                  Proceed to Checkout
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <ToastContainer />
     </div>
   );
 };

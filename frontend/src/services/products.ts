@@ -2,12 +2,13 @@ import { db } from '../firebase';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
 export interface Product {
-  id?: string;
+  id: string;
   name: string;
   price: number;
-  description: string;
   image: string;
+  description: string;
   category: string;
+  userId: string;
   quantity?: number;
 }
 
@@ -30,11 +31,31 @@ export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> 
 // Get all products
 export const getProducts = async (): Promise<Product[]> => {
   try {
+    console.log("Fetching products from Firestore...");
     const querySnapshot = await getDocs(collection(db, 'products'));
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Product[];
+    console.log("Query snapshot received:", querySnapshot.size, "documents");
+    
+    const products = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      console.log("Processing document:", doc.id, data);
+      
+      // Ensure all required fields are present
+      const product: Product = {
+        id: doc.id,
+        name: data.name || '',
+        price: data.price || 0,
+        image: data.image || '',
+        description: data.description || '',
+        category: data.category || '',
+        userId: data.userId || '',
+        quantity: data.quantity || 0
+      };
+      
+      return product;
+    });
+    
+    console.log("Final products array:", products);
+    return products;
   } catch (error) {
     console.error('Error getting products:', error);
     throw error;
@@ -53,12 +74,11 @@ export const updateProduct = async (id: string, product: Partial<Product>): Prom
 };
 
 // Delete a product
-export const deleteProduct = async (id: string): Promise<void> => {
+export const deleteProduct = async (productId: string): Promise<void> => {
   try {
-    const productRef = doc(db, 'products', id);
-    await deleteDoc(productRef);
+    await deleteDoc(doc(db, "products", productId));
   } catch (error) {
-    console.error('Error deleting product:', error);
+    console.error("Error deleting product:", error);
     throw error;
   }
 }; 
