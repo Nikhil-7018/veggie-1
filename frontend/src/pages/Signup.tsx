@@ -35,7 +35,7 @@ function Signup() {
       return handleError('name, email and password are required');
     }
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
       // Sign out the user immediately after successful signup
       await signOut(auth);
       handleSuccess('Account created successfully! Please login.');

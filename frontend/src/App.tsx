@@ -14,6 +14,8 @@ import FAQ from './components/FAQ';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import About from './components/About';
+import Checkout from './components/Checkout';
+import OrderConfirmation from './components/OrderConfirmation';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -60,6 +62,8 @@ function App() {
       <Route path='/privacy' element={<PrivateRoute element={<TermsAndPrivacy />} />} />
       <Route path='/faq' element={<PrivateRoute element={<FAQ />} />} />
       <Route path='/about' element={<PrivateRoute element={<About />} />} />
+      <Route path='/checkout' element={<PrivateRoute element={<Checkout />} />} />
+      <Route path='/order-confirmation' element={<PrivateRoute element={<OrderConfirmation />} />} />
     </Routes>
   </div>
   );

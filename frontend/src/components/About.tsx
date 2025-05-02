@@ -1,5 +1,4 @@
 import '../index.css';
-import Shop from './shop';
 import { useNavigate } from 'react-router-dom';
 
 function Body() {

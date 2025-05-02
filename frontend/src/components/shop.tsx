@@ -89,14 +89,6 @@ const Shop = () => {
     }
   };
 
-  const handleClearCart = () => {
-    localStorage.removeItem("cart");
-    toast.success("Cart cleared successfully!", {
-      position: "top-center",
-      autoClose: 1000,
-    });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

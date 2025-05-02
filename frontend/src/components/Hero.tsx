@@ -28,7 +28,7 @@ const Body = () => {
     return () => clearInterval(intervalId);
   }, [slides.length]);
 
-  const { image, heading, subheading, buttonText } = slides[currentSlide];
+  const { image, heading, subheading } = slides[currentSlide];
 
   return (
     <div className="relative h-[770px] w-full overflow-hidden" id="hero">

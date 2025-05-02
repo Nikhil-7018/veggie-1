@@ -38,12 +38,7 @@ const CartPage: React.FC = () => {
   const totalBill = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    toast.success(`Order placed successfully! Total: ₹${totalBill.toFixed(2)}`, { 
-      position: "top-center",
-      autoClose: 3000 
-    });
-    setCart([]);
-    localStorage.removeItem("cart");
+    navigate('/checkout');
   };
 
   return (

@@ -15,7 +15,7 @@ const Navbar = () => {
     setLoggedInUser(user || '');
   }, []);
 
-  const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const handleLogout = async (): Promise<void> => {
     try {
       await signOut(auth);
       localStorage.removeItem('token');
@@ -48,11 +48,11 @@ const Navbar = () => {
           <div className="flex justify-between items-center bg-lime-700 px-8 py-2 text-white">
             <div className="flex items-center gap-2">
               <Phone size={20} />
-              <span>+91 70184xxxxx</span>
+              <span>+91 1234567890</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail size={20} />
-              <span>YOUREMAIL@EMAIL.COM</span>
+              <span>contact@veggiecart.com</span>
             </div>
             <div className="flex items-center gap-2">
               <Truck size={20} />
